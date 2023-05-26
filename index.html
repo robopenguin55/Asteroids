@@ -38,56 +38,7 @@
         //     console.log(`keypress ${e.keyCode}`);
         // }
 
-        document.onkeydown = (e) => {
-            e = e || window.event;
-
-            const canvas = document.getElementById("content");
-            const ctx = canvas.getContext("2d");
-            const ship = document.getElementById("ship");
-
-            
-            // console.log(`keydown ${e.keyCode}`);
-
-            if (e.keyCode === 38) { // up
-                e.preventDefault();
-
-                // go forward
-                shipSound.play();
-                // currentVelocity[1]++;
-
-                currentVelocity[0] -= Math.sin(currentDirectionAngle);
-                currentVelocity[1] += Math.cos(currentDirectionAngle);
-            } else if (e.keyCode === 40) { // down
-                e.preventDefault();
-                
-                // slow down
-                if (currentVelocity[1] > 0) {
-                    currentVelocity[1]--;
-                    //currentVelocity[1] -= Math.sin(currentDirectionAngle)*currentVelocity[1];
-                }
-            } else if (e.keyCode === 37) {  // left
-                e.preventDefault();
-
-                // rotate counter-clockwise
-                // currentDirectionAngle -= (Math.PI/6); // 30 degrees
-                currentDirectionAngle -= (Math.PI/12); // 15 degrees
-
-            } else if (e.keyCode === 39) { // right
-                e.preventDefault();
-
-                // rotate clockwise
-                // currentDirectionAngle += (Math.PI/6); // -30 degrees
-                currentDirectionAngle += (Math.PI/12); // -15 degrees
-            }
-            else if (e.keyCode === 32) {  // space
-                e.preventDefault();
-
-                // fire!
-                fireSound.play();
-            }
-
-            console.log(`x:${currentLocation[0]} y: ${currentLocation[1]} direction angle : ${currentDirectionAngle} velocity : ${currentVelocity[1]}`);
-        };
+        
 
         document.onkeyup = (e) => {
             e = e || window.event;
@@ -118,6 +69,61 @@
             context.fillRect(0,0,canvas.width, canvas.height);
 
             const trig = new Trigonometry(context);
+
+            document.onkeydown = (e) => {
+                e = e || window.event;
+
+                const canvas = document.getElementById("content");
+                const ctx = canvas.getContext("2d");
+                const ship = document.getElementById("ship");
+                const t = new Trigonometry(ctx);
+
+                
+                // console.log(`keydown ${e.keyCode}`);
+
+                if (e.keyCode === 38) { // up
+                    e.preventDefault();
+
+                    // go forward
+                    shipSound.play();
+                    // currentVelocity[1]++;
+
+                    currentVelocity[0] -= Math.sin(currentDirectionAngle);
+                    currentVelocity[1] += Math.cos(currentDirectionAngle);
+                } else if (e.keyCode === 40) { // down
+                    e.preventDefault();
+                    
+                    // slow down
+                    if (currentVelocity[1] > 0) {
+                        currentVelocity[1]--;
+                        //currentVelocity[1] -= Math.sin(currentDirectionAngle)*currentVelocity[1];
+                    }
+                } else if (e.keyCode === 37) {  // left
+                    e.preventDefault();
+
+                    // rotate counter-clockwise
+                    // currentDirectionAngle -= (Math.PI/6); // 30 degrees
+                    currentDirectionAngle -= (Math.PI/12); // 15 degrees
+
+                } else if (e.keyCode === 39) { // right
+                    e.preventDefault();
+
+                    // rotate clockwise
+                    // currentDirectionAngle += (Math.PI/6); // -30 degrees
+                    currentDirectionAngle += (Math.PI/12); // -15 degrees
+                }
+                else if (e.keyCode === 32) {  // space
+                    e.preventDefault();
+
+                    // fire!
+                    fireSound.play();
+                    // use the current direction angle and current location to determine angle and origin of projectile
+                    // add projectile to array of projectiles to be shown in game loop
+                    console.log(`drawing circle at x:${currentLocation[0]+20} y:${currentLocation[1]+20}`);
+                }
+
+                console.log(`x:${currentLocation[0]} y: ${currentLocation[1]} direction angle : ${currentDirectionAngle} velocity : ${currentVelocity[1]}`);
+        };
 
             const drawShip = function() {
                 let image = new Image();
@@ -192,6 +198,9 @@
                     let imageBufferY = image.height + 25;
 
                     console.log(`width : ${canvas.width} height: ${canvas.height} x:${currentLocation[0]} y:${currentLocation[1]}`);
+
+                    // loop through all projectiles here
+                    // clear and redraw in new locations
 
                     // clear previous ship location
                     // clearRect(x, y, width, height)
