@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Math</title>
+    <title>Asteroids</title>
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"
             integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g="
             crossorigin="anonymous"></script>
     <script type="text/javascript" src="trig.js"></script>
     <script type="text/javascript" src="2DCoordinatePlane.js"></script>
+    <script type="text/javascript" src="sound.js"></script>
     <style type="text/css">
         canvas{border: 1px solid black;}
     </style>
@@ -15,6 +16,8 @@
         let currentLocation = [0.0,0.0];
         let currentVelocity = [0.0,0.0]; // [x,y]
         let currentDirectionAngle = 2*Math.PI; // default facing upward (which is 2Pi in js...)
+        const shipSound = new sound("thrust.wav");
+        const fireSound = new sound("fire.wav");
 
         window.addEventListener('resize', function(event) {
             const canvas = document.getElementById("content");
@@ -23,12 +26,17 @@
             canvas.setAttribute("width", window.innerWidth);
             canvas.setAttribute("height", window.innerHeight);
 
-            
             context.fillStyle = 'black';
             context.fillRect(0,0,canvas.width, canvas.height);
 
-            drawStars(200); // redraw the stars
+            //drawStars(200); // redraw the stars
         }, true);
+
+        // document.onkeypress = (e) => {
+        //     e = e || window.event;
+
+        //     console.log(`keypress ${e.keyCode}`);
+        // }
 
         document.onkeydown = (e) => {
             e = e || window.event;
@@ -37,37 +45,57 @@
             const ctx = canvas.getContext("2d");
             const ship = document.getElementById("ship");
 
-            console.log(`x:${currentLocation[0]} y: ${currentLocation[1]}`);
+            
+            // console.log(`keydown ${e.keyCode}`);
 
             if (e.keyCode === 38) { // up
                 e.preventDefault();
 
                 // go forward
-                // currentLocationX += currentLocationY/(Math.sin(currentDirectionAngle));
-                // currentLocationY += currentLocationY/(Math.sin(currentDirectionAngle));
-                currentVelocity[1]++;
+                shipSound.play();
+                // currentVelocity[1]++;
+
+                currentVelocity[0] -= Math.sin(currentDirectionAngle);
+                currentVelocity[1] += Math.cos(currentDirectionAngle);
             } else if (e.keyCode === 40) { // down
                 e.preventDefault();
                 
                 // slow down
-                // currentLocationX -= currentLocationY/(Math.sin(currentDirectionAngle));
-                // currentLocationY -= currentLocationY/(Math.sin(currentDirectionAngle));
                 if (currentVelocity[1] > 0) {
                     currentVelocity[1]--;
+                    //currentVelocity[1] -= Math.sin(currentDirectionAngle)*currentVelocity[1];
                 }
             } else if (e.keyCode === 37) {  // left
                 e.preventDefault();
 
                 // rotate counter-clockwise
-                currentDirectionAngle -= (Math.PI/6); // 30 degrees
+                // currentDirectionAngle -= (Math.PI/6); // 30 degrees
+                currentDirectionAngle -= (Math.PI/12); // 15 degrees
 
             } else if (e.keyCode === 39) { // right
                 e.preventDefault();
 
                 // rotate clockwise
-                currentDirectionAngle += (Math.PI/6); // -30 degrees
+                // currentDirectionAngle += (Math.PI/6); // -30 degrees
+                currentDirectionAngle += (Math.PI/12); // -15 degrees
             }
+            else if (e.keyCode === 32) {  // space
+                e.preventDefault();
+
+                // fire!
+                fireSound.play();
+            }
+
+            console.log(`x:${currentLocation[0]} y: ${currentLocation[1]} direction angle : ${currentDirectionAngle} velocity : ${currentVelocity[1]}`);
         };
+
+        document.onkeyup = (e) => {
+            e = e || window.event;
+
+            if (e.keyCode){ // up
+                shipSound.stop();
+            }
+        }
 
         $('document').ready(function(){
             const canvas = document.getElementById("content");
@@ -86,8 +114,10 @@
             };
 
             const context = canvas.getContext('2d');
-            context.fillStyle = 'black';
+            //context.fillStyle = 'black';
             context.fillRect(0,0,canvas.width, canvas.height);
+
+            const trig = new Trigonometry(context);
 
             const drawShip = function() {
                 let image = new Image();
@@ -103,22 +133,12 @@
                 return image;
             }
 
-            const drawCircle = function(x, y) {
-                if (canvas.getContext){
-                    context.beginPath();
-                    context.arc(x,y,1,0,(2 * Math.PI), true);
-                    context.strokeStyle = 'white';
-                    context.fillStyle = 'white';
-                    context.stroke();
-                }
-            }
-
             const drawStars = function(count) {
                 for (let i = 0; i < count; i++){
                     const randomX = getRandom(canvas.width);
                     const randomY = getRandom(canvas.height);
 
-                    drawCircle(randomX, randomY);
+                    trig.drawCircle(randomX, randomY);
                 }
             }
 
@@ -131,20 +151,62 @@
             // setTransform(horizontal scaling, vertical skewing, horizontal skewing, vertical scaling, horizontal translation, vertical translation)
 
             async function run() {
-                // const plane = new TwoDCoordinatePlane(window.innerWidth, window.innerHeight);
                 drawStars(200);
+
+                let imageX = 0;
+                let imageY = 0;
                 
                 while (true) {
+
+                    // console.log(currentLocation[1]-currentVelocity[1])
+                    // if ((currentLocation[1] - currentVelocity[1]) <= 0){
+                    //     // clear top of screen
+                    //     context.clearRect(-(imageX/2),-(window.innerHeight),imageX, imageY);
+                    //     console.log(`clearing top of screen : ${-(imageX/2)},${-(window.innerHeight)},${imageX},${imageY}`);
+                    // } 
+
                     currentLocation[0] = (currentLocation[0] - currentVelocity[0]) <= 0 ? canvas.width : (currentLocation[0] - currentVelocity[0]);
                     currentLocation[1] = (currentLocation[1] - currentVelocity[1]) <= 0 ? canvas.height : (currentLocation[1] - currentVelocity[1]);
 
+                    // translate from right to left
+                    if (currentLocation[0] > canvas.width)
+                        currentLocation[0] = 0;
+
+                    // translate from top to bottom
+                    if (currentLocation[1] > canvas.height)
+                        currentLocation[1] = 0;
+
                     const image = drawShip();
+
+                    if (imageX == 0)
+                        imageX = image.width;
+
+                    if (imageY == 0)
+                        imageY = image.height;
                     
                     context.setTransform(1,0,0,1,0,0);
-                    context.clearRect(currentLocation[0],currentLocation[1],image.width, image.height);
-                    // context.fillStyle = 'black';
-                    context.fillRect(currentLocation[0],currentLocation[1],image.width, image.height);
-                    await new Promise(resolve => setTimeout(resolve, (1000/30)));
+
+                    let moveLeft = image.width / 2;
+                    let moveUp = image.height / 2;
+                    let imageBufferX = image.width + 25;
+                    let imageBufferY = image.height + 25;
+
+                    console.log(`width : ${canvas.width} height: ${canvas.height} x:${currentLocation[0]} y:${currentLocation[1]}`);
+
+                    // clear previous ship location
+                    // clearRect(x, y, width, height)
+                    // look into using clip()
+                    context.clearRect(currentLocation[0]-moveLeft,currentLocation[1]-moveUp,image.width, image.height);
+
+                    context.fillStyle = 'black';
+
+                    // draw new ship location
+                    // current x location
+                    // x - 12.5  -> x - center of image
+                    // 
+                    context.fillRect(currentLocation[0]-moveLeft,currentLocation[1]-moveUp,image.width, image.height);
+
+                    await new Promise(resolve => setTimeout(resolve, (1000/30))); // going for 30 frames per second (1 second / 30)
                 }
             }
 

@@ -1,12 +1,14 @@
 class Trigonometry {
+    constructor (context){
+        this.context = context;
+    }
  
-    DrawCircle() {
-        const innerHeight = window.innerHeight;
-        const outerHeight = window.outerHeight;
-        const outerWidth = window.outerWidth;
-        const innerWidth = window.innerWidth;
-
-        console.log(`ih: ${innerHeight}, oh: ${outerHeight}, iw: ${innerWidth}, ow: ${outerWidth}`);
+    drawCircle(x, y) {
+        this.context.beginPath();
+        this.context.arc(x,y,1,0,(2 * Math.PI), true);
+        this.context.strokeStyle = 'white';
+        this.context.fillStyle = 'white';
+        this.context.stroke();
     }
 
 }
