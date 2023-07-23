@@ -3,9 +3,9 @@ class Ship extends Projectile {
     constructor(context, originX, originY){
         super(context,originX, originY, 0, 0);
 
-        this.shipSound = new sound("thrust.wav");
-        this.fireSound = new sound("fire.wav");
-        this.shipImage = 'player.png'; //'spaceship-25.png';
+        this.shipSound = new sound("sounds/thrust.wav");
+        this.fireSound = new sound("sounds/fire.wav");
+        this.shipImage = 'images/player.png'; //'spaceship-25.png';
         this.projectiles = [];
 
         document.onkeyup = (e) => {
@@ -72,7 +72,7 @@ class Ship extends Projectile {
     drawProjectiles(width, height) {
         for (let i = 0; i < this.projectiles.length; i++){
             this.projectiles[i].updateLocation(width, height);
-            this.projectiles[i].draw(`${i}`,'projectile.png');
+            this.projectiles[i].draw(`${i}`,'images/projectile.png');
         }
     }
 

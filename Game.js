@@ -23,32 +23,6 @@ class Game {
         return Math.floor(Math.random() * max);
     };
 
-    drawProjectiles() {
-        let removeProjectiles = [];
-            // projectile layout : [x, y, v_x, v_y]
-            //                     [0, 1,  2 ,  3 ]
-        for (let i = 0; i < projectiles.length; i++){
-            // x = x - v_x
-            // y = y - v_y
-            projectiles[i][0] = projectiles[i][0] - projectiles[i][2];
-            projectiles[i][1] = projectiles[i][1] - projectiles[i][3];
-
-            console.log(`drawing ${projectiles[i]}`);
-            
-            this.trig.drawCircle(projectiles[i][0],projectiles[i][1],3);
-            this.trig.drawCircle(0,50,3);
-
-            if ((projectiles[i][0] <= 0) || (projectiles[i][1] <= 0)){
-                //removeProjectiles.push(i); // slated for removal
-            }
-        }
-
-        for (let r of removeProjectiles){
-            console.log(`removing ${r}`);
-            projectiles.splice(r,1);
-        }
-    }
-
     drawStars(count) {
 
         if (this.stars.length < 1) {
