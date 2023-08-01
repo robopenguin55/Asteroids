@@ -15,21 +15,17 @@ class Game {
 
         this.trig = new Trigonometry(this.context);
         this.ship = new Ship(this.context, originX, originY);
-        //this.projectiles = [];
-        //this.asteroid = new Asteroid(this.context, originX, originY, 2, 1.5);
+        this.asteroids = [];
+        this.utils = new Utilities();
     }
-
-    getRandom(max) {
-        return Math.floor(Math.random() * max);
-    };
 
     drawStars(count) {
 
         if (this.stars.length < 1) {
 
             for (let i = 0; i < count; i++){
-                const randomX = this.getRandom(this.canvas.width);
-                const randomY = this.getRandom(this.canvas.height);
+                const randomX = this.utils.getRandom(this.canvas.width);
+                const randomY = this.utils.getRandom(this.canvas.height);
 
                 this.stars.push([randomX,randomY]);
                 this.trig.drawCircle(randomX, randomY);
@@ -42,26 +38,42 @@ class Game {
         }
     }
 
+    drawAsteroids(count) {
+        // populate asteroids if we don't have any
+        if (this.asteroids.length < 1){
+            const maxVelocity = 5;
+            for (let i = 0; i < count; i++){
+                let a = new Asteroid(this.context, this.utils.getRandom(this.canvas.width), this.utils.getRandom(this.canvas.height), this.utils.getRandom(maxVelocity), this.utils.getRandom(maxVelocity));
+                this.asteroids.push(a);
+            }
+        }
+
+        // update asteroid locations
+        for (let a of this.asteroids){
+            const newLocation = a.updateLocation(this.canvas.width, this.canvas.height);
+            a.draw();
+        }
+    }
+
     async run() {
 
-        let imageX = 0;
-        let imageY = 0;
-        
         while (true) {
 
-            // draw projectiles
+            // re-create context
             this.context.clearRect(0,0,this.canvas.width, this.canvas.height);
-
             this.context.fillStyle = 'black';
             this.context.fillRect(0,0,this.canvas.width, this.canvas.height);
 
             // ship location 
-            this.ship.updateLocation(this.canvas.width, this.canvas.height)
-            //this.asteroid.updateLocation(this.canvas.width, this.canvas.height);
+            const newShipLocation = this.ship.updateLocation(this.canvas.width, this.canvas.height)
+
+            // asteroids
+            this.drawAsteroids(10);
 
             // draw ship
-            const image = this.ship.draw();
-            //this.asteroid.draw();
+            this.ship.draw();
+
+            this.ship.getProjectileLocations();
 
             this.ship.drawProjectiles(this.canvas.width, this.canvas.height);
 
